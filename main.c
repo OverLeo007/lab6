@@ -62,11 +62,13 @@ int main(void) {
                 puts("Река успешно добавлена");
                 break;
 
-            case 2:
+            case 2: {
                 puts("Введите номер реки для удаления:");
                 int num = input_int();
-
-                printf("Река %s удалена\n", delete_river(list, num));
+                char *d_name = delete_river(list, num);
+                if (d_name[0] == '\0') break;
+                printf("Река %s удалена\n", d_name);
+                }
                 break;
 
             case 3:
@@ -415,11 +417,11 @@ void add_river(int length, char *name, int depth, DblLinkedList *list) {
 char *delete_river(DblLinkedList *list, size_t index) {
     Node *elm = NULL;
     elm = get_node(list, index - 1);
-    char *name = (elm->value).name;
     if (elm == NULL) {
         puts("Некорректное значение");
-        return;
+        return "\0";
     }
+    char *name = (elm->value).name;
     if (elm->prev) {
         elm->prev->next = elm->next;
     }
