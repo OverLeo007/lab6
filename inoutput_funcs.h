@@ -1,7 +1,3 @@
-//
-// Created by leva on 14.05.2022.
-//
-
 #ifndef UNTITLED_INOUTPUT_FUNCS_H
 #define UNTITLED_INOUTPUT_FUNCS_H
 

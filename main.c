@@ -10,8 +10,8 @@
 #include "inoutput_funcs.h"
 #include "head.h"
 
-#define MAX_RIVERS 1000
-#define RSIZE sizeof(river);
+#define CUR_RIVER (tmp->value)
+
 
 int main(void) {
     DblLinkedList *list = create_dlLinkedList();
@@ -19,155 +19,294 @@ int main(void) {
     srand(time(NULL));
     system("chcp 65001 > nul");
 
-    char name[5][10] = {"aboba", "abiba", "atata", "akunamata", "dababy?"};
+    char names[5][10] = {"aboba", "abiba", "atata", "akunamata", "dababy?"};
     for (int i = 0; i < 5; i++) {
-        add_river(rand() % 1000, name[i], rand() % 5, list);
+        add_river(rand() % 1000, names[i], rand() % 5, list);
 
     }
-    print_rivers(list);
-    puts("");
-    bubble_sort(list, compare_lens);
-//    swap_with_next(list, get_node(list, 4));
+    int menu_variant;
+    do {
+        puts("1. Добавить реку");
+        puts("2. Удалить реку по номеру");
+        puts("3. Вывести реки");
+        puts("4. Меню сортировки");
+        puts("5. Меню фильтрации");
+        puts("6. Сохранить реки в файл");
+        puts("7. Загрузить реки из файла");
+        puts("8. Выйти");
 
-    print_rivers(list);
 
-    delete_dblLinkedList(&list);
+        menu_variant = input_int();
+
+        switch (menu_variant) {
+            case 1:
+                puts("Введите назавние реки:");
+                char *name = input_string();
+                if (name[0] == '\0') {
+                    puts("Некорректное имя!");
+                    break;
+                }
+                puts("Введите длину реки:");
+                int lenght = input_int();
+                if (lenght == -1) {
+                    puts("Некорректная длина!");
+                    break;
+                }
+                puts("Введите минимальную глубину реки:");
+                int depth = input_int();
+                if (depth < 1) {
+                    puts("Некорректная минимальная глубина!");
+                    break;
+                }
+                add_river(lenght, name, depth, list);
+                puts("Река успешно добавлена");
+                break;
+
+            case 2:
+                puts("Введите номер реки для удаления:");
+                int num = input_int();
+
+                printf("Река %s удалена\n", delete_river(list, num));
+                break;
+
+            case 3:
+                print_rivers(list);
+                break;
+
+            case 4:
+                sort_menu(list);
+                break;
+            case 5: {
+                unsigned char *fields = pick_ffields();
+                print_filters(fields, list);
+            } break;
+            case 6:
+                save(list);
+                puts("Реки успешно сохранены в файл");
+                break;
+            case 7:
+                delete_dblLinkedList(&list);
+                list = load();
+                puts("Реки успешно загружены из файла");
+                break;
+            case 8:
+                delete_dblLinkedList(&list);
+                break;
+            default:
+                puts("Такого варианта в меню нет!");
+                break;
+        }
+    } while (menu_variant != 8);
+
+    return 0;
 }
 
 
-DblLinkedList *create_dlLinkedList() {
-    DblLinkedList *tmp = (DblLinkedList *) malloc(sizeof(DblLinkedList));
-    tmp->size = 0;
-    tmp->head = tmp->tail = NULL;
 
-    return tmp;
+void sort_menu(DblLinkedList *list){
+    int sort_variant;
+    do {
+        puts("1. Отсортировать по имени");
+        puts("2. Отсортировать по длине");
+        puts("3. Отсортировать по минимальной глубине");
+        puts("4. Отсортировать по проходимости для судов");
+        puts("5. Выйти из меню сортировки");
+        sort_variant = input_int();
+        switch (sort_variant) {
+            case 1:
+                bubble_sort(list, compare_names);
+                print_rivers(list);
+                break;
+            case 2:
+                bubble_sort(list, compare_lens);
+                print_rivers(list);
+                break;
+            case 3:
+                bubble_sort(list, compare_depths);
+                print_rivers(list);
+                break;
+            case 4:
+                bubble_sort(list, compare_pass);
+                print_rivers(list);
+                break;
+            case 5:
+                break;
+            default:
+                puts("Такого варианта выбора нет!");
+        }
+    } while (sort_variant != 5);
+}
+
+unsigned char *pick_ffields(){
+    unsigned char *picked_fields = calloc(4, sizeof(unsigned char));
+    int variant;
+    puts("Выберите поля по которым будет произведена фильтрация");
+    do {
+        (picked_fields[0]) ? puts("1. Вхождение в имя + ") :
+        puts("1. Вхождение в имя");
+        (picked_fields[1]) ? puts("2. Протяженность + ") :
+        puts("2. Протяженность");
+        (picked_fields[2]) ? puts("3. Наим. глубина + ") :
+        puts("3. Наим. глубина");
+        (picked_fields[3]) ? puts("4. Проходимость судов + ") :
+        puts("4. Проходимость судов");
+        puts("5. Сбросить фильтр");
+        puts("6. Завершить выбор фильтров");
+        variant = input_int();
+        switch (variant) {
+            case 1:
+                picked_fields[0] = 1;
+                break;
+            case 2:
+                picked_fields[1] = 1;
+                break;
+            case 3:
+                picked_fields[2] = 1;
+                break;
+            case 4:
+                picked_fields[3] = 1;
+                break;
+            case 5:
+                for (int i = 0; i < 4; i++) picked_fields[i] = 0;
+                break;
+            case 6:
+                return picked_fields;
+            default:
+                puts("Такого варианта выбора нет!");
+                break;
+        }
+    } while (1);
 }
 
 
-void delete_dblLinkedList(DblLinkedList **list) {
-    Node *tmp = (*list)->head;
-    Node *next = NULL;
+void print_filters(unsigned char *filters, DblLinkedList *list){
+    DblLinkedList *f_list = create_dlLinkedList();
+
+    Node *tmp = list->head;
     while (tmp) {
-        next = tmp->next;
-        free(tmp);
-        tmp = next;
+
+
+        add_river(CUR_RIVER.length,
+                  CUR_RIVER.name,
+                  CUR_RIVER.min_depth,
+                  f_list);
+        tmp = tmp->next;
     }
-    free(*list);
-    (*list) = NULL;
+    free(tmp);
+
+
+    while (1){
+        if (filters[0]) {
+            puts("\nВведите подстроку для имени");
+            char *subname = input_string();
+            if (subname[0] == '\0') {
+                puts("Некорректное значение!");
+                continue;
+            }
+
+            tmp = f_list->head;
+            while (tmp) {
+                if (strstr(CUR_RIVER.name, subname) == NULL) {
+                    CUR_RIVER.length = -1;
+                }
+                tmp = tmp->next;
+            }
+        }
+
+        if (filters[1]){
+            puts("Введите значение протяженности, от которого будем считать");
+            int flenght = input_int();
+            if (flenght <= 0) {
+                puts("Некорректное значение!");
+                continue;
+            }
+            printf("1. Ищем <%d\n", flenght);
+            printf("2. Ищем >%d\n", flenght);
+            int variant = input_int();
+            switch (variant) {
+                case 1:
+                    tmp = f_list->head;
+                    while (tmp) {
+                        if (CUR_RIVER.length >= flenght) CUR_RIVER.length = -1;
+
+                        tmp = tmp->next;
+                    }
+                    break;
+                case 2:
+                    tmp = f_list->head;
+                    while (tmp) {
+                        if (CUR_RIVER.length > 0 && CUR_RIVER.length < flenght)
+                            CUR_RIVER.length = -1;
+
+                        tmp = tmp->next;
+                    }
+                    break;
+                default:
+                    puts("Некорректное значение!");
+                    continue;
+            }
+
+        }
+
+        if (filters[2]){
+            puts("Введите значение минимальной глубины,"
+                 " от которого будем считать");
+            int fdepth = input_int();
+            if (fdepth <= 0) {
+                puts("Некорректное значение!");
+                continue;
+            }
+            printf("1. Ищем <%d\n", fdepth);
+            printf("2. Ищем >%d\n", fdepth);
+            int variant = input_int();
+            switch (variant) {
+                case 1:
+                    tmp = f_list->head;
+                    while (tmp) {
+                        if (CUR_RIVER.min_depth >= fdepth)
+                            CUR_RIVER.length = -1;
+
+                        tmp = tmp->next;
+                    }
+                    break;
+                case 2:
+                    tmp = f_list->head;
+                    while (tmp) {
+                        if (CUR_RIVER.min_depth > 0
+                        && CUR_RIVER.min_depth < fdepth)
+                            CUR_RIVER.length = -1;
+
+                        tmp = tmp->next;
+                    }
+                    break;
+                default:
+                    puts("Некорректное значение!");
+                    continue;
+            }
+        }
+        if (filters[3]){
+            puts("1. Несудоходная");
+            puts("2. Проходима для малых судов");
+            puts("3. Проходима для крупных судов");
+            int varinant = input_int();
+            if (varinant < 1 || varinant > 3){
+                puts("Некорректное значение!");
+                continue;
+            }
+            tmp = f_list->head;
+            while (tmp) {
+                if (CUR_RIVER.passability_lvl != (varinant - 1))
+                    CUR_RIVER.length = -1;
+
+                tmp = tmp->next;
+            }
+        }
+        break;
+    }
+    print_rivers(f_list);
+    delete_dblLinkedList(&f_list);
+    free(filters);
 }
-
-
-void add_river(int length, char *name, int depth, DblLinkedList *list) {
-    river tmp_river;
-    tmp_river.length = length;
-    tmp_river.name = name;
-    tmp_river.min_depth = depth;
-    tmp_river.id = (int) list->size;
-    if (depth < 2)
-        tmp_river.passability_lvl = 0;
-    else if (2 <= depth && depth < 4)
-        tmp_river.passability_lvl = 1;
-    else if (4 <= depth)
-        tmp_river.passability_lvl = 2;
-
-    Node *tmp = (Node *) malloc(sizeof(Node));
-
-    tmp->value = tmp_river;
-    tmp->next = NULL;
-    tmp->prev = list->tail;
-
-    if (list->tail) {
-        list->tail->next = tmp;
-    }
-    list->tail = tmp;
-
-    if (list->head == NULL) {
-        list->head = tmp;
-    }
-    list->size++;
-}
-
-void push_front(DblLinkedList *list, river new_river) {
-    Node *tmp = (Node *) malloc(sizeof(Node));
-    if (tmp == NULL) {
-        exit(1);
-    }
-    tmp->value = new_river;
-    tmp->next = list->head;
-    tmp->prev = NULL;
-    if (list->head) {
-        list->head->prev = tmp;
-    }
-    list->head = tmp;
-
-    if (list->tail == NULL) {
-        list->tail = tmp;
-    }
-    list->size++;
-}
-
-
-river pop_front(DblLinkedList *list) {
-    Node *prev;
-    river tmp;
-    if (list->head == NULL) {
-        exit(2);
-    }
-
-    prev = list->head;
-    list->head = list->head->next;
-    if (list->head) {
-        list->head->prev = NULL;
-    }
-    if (prev == list->tail) {
-        list->tail = NULL;
-    }
-    tmp = prev->value;
-    free(prev);
-
-    list->size--;
-    return tmp;
-}
-
-void push_back(DblLinkedList *list, river value) {
-    Node *tmp = (Node *) malloc(sizeof(Node));
-    if (tmp == NULL) {
-        exit(3);
-    }
-    tmp->value = value;
-    tmp->next = NULL;
-    tmp->prev = list->tail;
-    if (list->tail) {
-        list->tail->next = tmp;
-    }
-    list->tail = tmp;
-
-    if (list->head == NULL) {
-        list->head = tmp;
-    }
-    list->size++;
-}
-
-void insert_before_element(DblLinkedList *list, Node *elm, river value) {
-    Node *ins = NULL;
-    if (elm == NULL) {
-        exit(6);
-    }
-
-    if (!elm->prev) {
-        push_front(list, value);
-        return;
-    }
-    ins = (Node *) malloc(sizeof(Node));
-    ins->value = value;
-    ins->prev = elm->prev;
-    elm->prev->next = ins;
-    ins->next = elm;
-    elm->prev = ins;
-
-    list->size++;
-}
-
 
 
 void swap_with_next(DblLinkedList *list, Node *n1){
@@ -207,6 +346,28 @@ void bubble_sort(DblLinkedList *list, int (*cmp)(const river *, const river *)) 
 }
 
 
+DblLinkedList *create_dlLinkedList() {
+    DblLinkedList *tmp = (DblLinkedList *) malloc(sizeof(DblLinkedList));
+    tmp->size = 0;
+    tmp->head = tmp->tail = NULL;
+
+    return tmp;
+}
+
+
+void delete_dblLinkedList(DblLinkedList **list) {
+    Node *tmp = (*list)->head;
+    Node *next = NULL;
+    while (tmp) {
+        next = tmp->next;
+        free(tmp);
+        tmp = next;
+    }
+    free(*list);
+    (*list) = NULL;
+}
+
+
 Node *get_node(DblLinkedList *list, size_t index) {
     Node *tmp = list->head;
     size_t i = 0;
@@ -220,9 +381,41 @@ Node *get_node(DblLinkedList *list, size_t index) {
 }
 
 
-void delete_river(DblLinkedList *list, size_t index) {
+void add_river(int length, char *name, int depth, DblLinkedList *list) {
+    river tmp_river;
+    tmp_river.length = length;
+    tmp_river.name = name;
+    tmp_river.min_depth = depth;
+    tmp_river.id = (int) list->size;
+    if (depth < 2)
+        tmp_river.passability_lvl = 0;
+    else if (2 <= depth && depth < 4)
+        tmp_river.passability_lvl = 1;
+    else if (4 <= depth)
+        tmp_river.passability_lvl = 2;
+
+    Node *tmp = (Node *) malloc(sizeof(Node));
+
+    tmp->value = tmp_river;
+    tmp->next = NULL;
+    tmp->prev = list->tail;
+
+    if (list->tail) {
+        list->tail->next = tmp;
+    }
+    list->tail = tmp;
+
+    if (list->head == NULL) {
+        list->head = tmp;
+    }
+    list->size++;
+}
+
+
+char *delete_river(DblLinkedList *list, size_t index) {
     Node *elm = NULL;
-    elm = get_node(list, index);
+    elm = get_node(list, index - 1);
+    char *name = (elm->value).name;
     if (elm == NULL) {
         puts("Некорректное значение");
         return;
@@ -244,6 +437,7 @@ void delete_river(DblLinkedList *list, size_t index) {
     free(elm);
 
     list->size--;
+    return name;
 }
 
 void print_rivers(DblLinkedList *list) {
@@ -261,7 +455,7 @@ void print_rivers(DblLinkedList *list) {
 //        int next_id = -1;
 //        if (tmp->next) next_id = tmp->next->value.id;
 //        printf("%d %d\n", prev_id, next_id);
-        print_river(tmp->value, i);
+        if (CUR_RIVER.length != -1) print_river(CUR_RIVER, i);
         tmp = tmp->next;
         ++i;
     }
@@ -272,7 +466,7 @@ void print_rivers(DblLinkedList *list) {
 void print_river(river river_tp, int num) {
     printf("Река №%d\n", num + 1);
     printf("\tНазвание %s\n", river_tp.name);
-    printf("\tid: %d\n", river_tp.id);
+//    printf("\tid: %d\n", river_tp.id);
     printf("\tПротяженность: %d\n", river_tp.length);
     printf("\tМинимальная глубина: %d\n", river_tp.min_depth);
     if (river_tp.passability_lvl == 0)
@@ -328,6 +522,7 @@ DblLinkedList *load() {
     fscanf(file, "%d\n", &llen);
     int prev_id, next_id;
     int id, length, depth, pass;
+
 
     for (int i = 0; i < llen; i++) {
         fscanf(file, "%d║%d\n", &prev_id, &next_id);

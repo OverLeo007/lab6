@@ -1,6 +1,4 @@
-//
-// Created by leva on 14.05.2022. 20:37
-//
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

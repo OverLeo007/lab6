@@ -21,12 +21,17 @@ typedef struct _DblLinkedList {
     Node *tail;
 } DblLinkedList;
 
+void sort_menu();
 
 DblLinkedList* create_dlLinkedList();
 
+unsigned char *pick_ffields();
+
+void print_filters(unsigned char *filters, DblLinkedList *list);
+
 void delete_dblLinkedList(DblLinkedList **list);
 
-void delete_river(DblLinkedList *list, size_t index);
+char *delete_river(DblLinkedList *list, size_t index);
 
 void add_river(int length, char *name, int depth, DblLinkedList *list);
 
