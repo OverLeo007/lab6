@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+/* Возвращает строку из stdin */
 char *input_string() {
     size_t size = 80;
     size_t curr = 0;
@@ -24,6 +26,7 @@ char *input_string() {
 }
 
 
+/* Проверка на то что введенное значение - int */
 int input_int_check(char value_array[]) {
     for (int i = 0; i < strlen(value_array) - 1; ++i) {
         if ((value_array[i] < '0') || (value_array[i] > '9')) {
@@ -34,6 +37,7 @@ int input_int_check(char value_array[]) {
 }
 
 
+/* Возвращает число из stdin */
 int input_int() {
     char str_array_len[5];
     fgets(str_array_len, 5, stdin);

@@ -70,7 +70,7 @@ int main(void) {
                 char *d_name = delete_river(list, num);
                 if (d_name[0] == '\0') break;
                 printf("Река %s удалена\n", d_name);
-                }
+            }
                 break;
 
             case 3:
@@ -83,7 +83,8 @@ int main(void) {
             case 5: {
                 unsigned char *fields = pick_ffields();
                 print_filters(fields, list);
-            } break;
+            }
+                break;
             case 6:
                 save(list);
                 puts("Реки успешно сохранены в файл");
@@ -113,8 +114,9 @@ int main(void) {
 }
 
 
-
-void sort_menu(DblLinkedList *list){
+/* Вывод меню сортировки с последующим выбором поля,
+ * по которому будем сортировать и сама сортировка */
+void sort_menu(DblLinkedList *list) {
     int sort_variant;
     do {
         puts("1. Отсортировать по имени");
@@ -148,7 +150,9 @@ void sort_menu(DblLinkedList *list){
     } while (sort_variant != 5);
 }
 
-unsigned char *pick_ffields(){
+
+/* Меню выбора фильтров для передачи в функцию фильтрации*/
+unsigned char *pick_ffields() {
     unsigned char *picked_fields = calloc(4, sizeof(unsigned char));
     int variant;
     puts("Выберите поля по которым будет произведена фильтрация");
@@ -190,7 +194,8 @@ unsigned char *pick_ffields(){
 }
 
 
-void print_filters(unsigned char *filters, DblLinkedList *list){
+/* Сбор данных по выбранным фильтрам и вывод отфильтрованного списка */
+void print_filters(unsigned char *filters, DblLinkedList *list) {
     DblLinkedList *f_list = create_dlLinkedList();
 
     Node *tmp = list->head;
@@ -206,7 +211,7 @@ void print_filters(unsigned char *filters, DblLinkedList *list){
     free(tmp);
 
 
-    while (1){
+    while (1) {
         if (filters[0]) {
             puts("\nВведите подстроку для имени");
             char *subname = input_string();
@@ -224,7 +229,7 @@ void print_filters(unsigned char *filters, DblLinkedList *list){
             }
         }
 
-        if (filters[1]){
+        if (filters[1]) {
             puts("Введите значение протяженности, от которого будем считать");
             int flenght = input_int();
             if (flenght <= 0) {
@@ -259,7 +264,7 @@ void print_filters(unsigned char *filters, DblLinkedList *list){
 
         }
 
-        if (filters[2]){
+        if (filters[2]) {
             puts("Введите значение минимальной глубины,"
                  " от которого будем считать");
             int fdepth = input_int();
@@ -284,7 +289,7 @@ void print_filters(unsigned char *filters, DblLinkedList *list){
                     tmp = f_list->head;
                     while (tmp) {
                         if (CUR_RIVER.min_depth > 0
-                        && CUR_RIVER.min_depth < fdepth)
+                            && CUR_RIVER.min_depth < fdepth)
                             CUR_RIVER.length = -1;
 
                         tmp = tmp->next;
@@ -295,12 +300,12 @@ void print_filters(unsigned char *filters, DblLinkedList *list){
                     continue;
             }
         }
-        if (filters[3]){
+        if (filters[3]) {
             puts("1. Несудоходная");
             puts("2. Проходима для малых судов");
             puts("3. Проходима для крупных судов");
             int varinant = input_int();
-            if (varinant < 1 || varinant > 3){
+            if (varinant < 1 || varinant > 3) {
                 puts("Некорректное значение!");
                 continue;
             }
@@ -319,7 +324,10 @@ void print_filters(unsigned char *filters, DblLinkedList *list){
     free(filters);
 }
 
-int get_len(const DblLinkedList *list){
+
+
+/* Получение длины списка */
+int get_len(const DblLinkedList *list) {
     int size = 0;
     Node *tmp = list->head;
     while (tmp) {
@@ -330,15 +338,18 @@ int get_len(const DblLinkedList *list){
 }
 
 
-void swap(Node* node) {
-    Node* prev = node->prev;
+/* Меняет местами следующую и пердыдущую ноды*/
+void swap(Node *node) {
+    Node *prev = node->prev;
     node->prev = node->next;
     node->next = prev;
 }
 
+
+/* Разворот списка */
 void reverse_DDL(DblLinkedList *list) {
-    Node* prev = NULL;
-    Node* curr = list->head;
+    Node *prev = NULL;
+    Node *curr = list->head;
 
     while (curr != NULL) {
         swap(curr);
@@ -354,7 +365,8 @@ void reverse_DDL(DblLinkedList *list) {
 }
 
 
-void swap_with_next(DblLinkedList *list, Node *n1){
+/* Меняет местами текущую и следующую ноды, заменяя все связи */
+void swap_with_next(DblLinkedList *list, Node *n1) {
     if (n1 == list->tail) return;
     Node *n0 = n1->prev;
     Node *n2 = n1->next;
@@ -373,7 +385,11 @@ void swap_with_next(DblLinkedList *list, Node *n1){
 
 }
 
-void bubble_sort(DblLinkedList *list, int (*cmp)(const river *, const river *)) {
+
+/* Сортировка списка пузырьком, по выбранному критерию,
+ * за который отвечает компаратор*/
+void bubble_sort(DblLinkedList *list,
+                 int (*cmp)(const river *, const river *)) {
     int len = (int) list->size;
     int sort = 1;
     int n = 0;
@@ -391,6 +407,7 @@ void bubble_sort(DblLinkedList *list, int (*cmp)(const river *, const river *)) 
 }
 
 
+/* Создание списка */
 DblLinkedList *create_dlLinkedList() {
     DblLinkedList *tmp = (DblLinkedList *) malloc(sizeof(DblLinkedList));
     tmp->size = 0;
@@ -400,6 +417,7 @@ DblLinkedList *create_dlLinkedList() {
 }
 
 
+/* Удаление списка */
 void delete_dblLinkedList(DblLinkedList **list) {
     Node *tmp = (*list)->head;
     Node *next = NULL;
@@ -413,6 +431,7 @@ void delete_dblLinkedList(DblLinkedList **list) {
 }
 
 
+/* Возвращает ноду по ее индексу*/
 Node *get_node(DblLinkedList *list, size_t index) {
     Node *tmp = list->head;
     size_t i = 0;
@@ -426,6 +445,7 @@ Node *get_node(DblLinkedList *list, size_t index) {
 }
 
 
+/* Добавляет элемент в список */
 void add_river(int length, char *name, int depth, DblLinkedList *list) {
     river tmp_river;
     tmp_river.length = length;
@@ -457,6 +477,7 @@ void add_river(int length, char *name, int depth, DblLinkedList *list) {
 }
 
 
+/* Удаляет элемент из списка по индексу */
 char *delete_river(DblLinkedList *list, size_t index) {
     Node *elm = NULL;
     elm = get_node(list, index - 1);
@@ -485,6 +506,8 @@ char *delete_river(DblLinkedList *list, size_t index) {
     return name;
 }
 
+
+/* Выводит все реки из списка */
 void print_rivers(DblLinkedList *list) {
     if (list->size == 0) {
         puts("Не добавлено ни одной реки");
@@ -508,6 +531,7 @@ void print_rivers(DblLinkedList *list) {
 }
 
 
+/* Вывод реки */
 void print_river(river river_tp, int num) {
     printf("Река №%d\n", num + 1);
     printf("\tНазвание %s\n", river_tp.name);
@@ -522,6 +546,8 @@ void print_river(river river_tp, int num) {
         puts("\tПроходима для крупных судов");
 }
 
+
+/* Сохраняет список в файл */
 void save(DblLinkedList *list) {
     FILE *file = fopen("rivers_data.txt", "w");
     if (!list->head) {
@@ -546,6 +572,8 @@ void save(DblLinkedList *list) {
     fclose(file);
 }
 
+
+/* Возвращает длину строки от SEEK_CUR до первого \n*/
 int line_len(FILE *file) {
     int len = 0;
     while (1) {
@@ -559,6 +587,7 @@ int line_len(FILE *file) {
 }
 
 
+/* Загрузка сохраненного списка в программу*/
 DblLinkedList *load() {
     FILE *file = fopen("rivers_data.txt", "r");
     DblLinkedList *new_list = create_dlLinkedList();
@@ -581,6 +610,8 @@ DblLinkedList *load() {
     return new_list;
 }
 
+
+/* Компаратор имени */
 int compare_names(const river *river1, const river *river2) {
     const char *name1 = river1->name;
     const char *name2 = river2->name;
@@ -588,6 +619,7 @@ int compare_names(const river *river1, const river *river2) {
 }
 
 
+/* Компаратор длины */
 int compare_lens(const river *river1, const river *river2) {
     const int len1 = river1->length;
     const int len2 = river2->length;
@@ -595,6 +627,7 @@ int compare_lens(const river *river1, const river *river2) {
 }
 
 
+/* Компаратор глубины */
 int compare_depths(const river *river1, const river *river2) {
     const int depth1 = river1->min_depth;
     const int depth2 = river2->min_depth;
@@ -602,6 +635,7 @@ int compare_depths(const river *river1, const river *river2) {
 }
 
 
+/* Компаратор проходимости */
 int compare_pass(const river *river1, const river *river2) {
     const int pass1 = river1->passability_lvl;
     const int pass2 = river2->passability_lvl;
