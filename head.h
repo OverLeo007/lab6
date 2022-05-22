@@ -25,6 +25,10 @@ void sort_menu();
 
 DblLinkedList* create_dlLinkedList();
 
+void swap(Node* node);
+
+void reverse_DDL(DblLinkedList *list);
+
 unsigned char *pick_ffields();
 
 void print_filters(unsigned char *filters, DblLinkedList *list);
@@ -33,15 +37,9 @@ void delete_dblLinkedList(DblLinkedList **list);
 
 char *delete_river(DblLinkedList *list, size_t index);
 
+int get_len(const DblLinkedList *list);
+
 void add_river(int length, char *name, int depth, DblLinkedList *list);
-
-void push_front(DblLinkedList *list, river new_river);
-
-river pop_front(DblLinkedList *list);
-
-void push_back(DblLinkedList *list, river value);
-
-void insert_before_element(DblLinkedList *list, Node* elm, river value);
 
 void swap_with_next(DblLinkedList *list, Node *n1);
 

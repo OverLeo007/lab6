@@ -33,7 +33,9 @@ int main(void) {
         puts("5. Меню фильтрации");
         puts("6. Сохранить реки в файл");
         puts("7. Загрузить реки из файла");
-        puts("8. Выйти");
+        puts("8. Развернуть список");
+        puts("9. Вывести длину списка");
+        puts("10. Выйти");
 
 
         menu_variant = input_int();
@@ -92,13 +94,20 @@ int main(void) {
                 puts("Реки успешно загружены из файла");
                 break;
             case 8:
+                reverse_DDL(list);
+                puts("Список развернут");
+                break;
+            case 9:
+                printf("Длина списка: %d\n", get_len(list));
+                break;
+            case 10:
                 delete_dblLinkedList(&list);
                 break;
             default:
                 puts("Такого варианта в меню нет!");
                 break;
         }
-    } while (menu_variant != 8);
+    } while (menu_variant != 10);
 
     return 0;
 }
@@ -308,6 +317,40 @@ void print_filters(unsigned char *filters, DblLinkedList *list){
     print_rivers(f_list);
     delete_dblLinkedList(&f_list);
     free(filters);
+}
+
+int get_len(const DblLinkedList *list){
+    int size = 0;
+    Node *tmp = list->head;
+    while (tmp) {
+        size++;
+        tmp = tmp->next;
+    }
+    return size;
+}
+
+
+void swap(Node* node) {
+    Node* prev = node->prev;
+    node->prev = node->next;
+    node->next = prev;
+}
+
+void reverse_DDL(DblLinkedList *list) {
+    Node* prev = NULL;
+    Node* curr = list->head;
+
+    while (curr != NULL) {
+        swap(curr);
+
+        prev = curr;
+
+        curr = curr->prev;
+    }
+
+    if (prev != NULL) {
+        list->head = prev;
+    }
 }
 
 
