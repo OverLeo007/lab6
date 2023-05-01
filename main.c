@@ -47,8 +47,8 @@ int main() {
                     break;
                 }
                 puts("Введите длину реки:");
-                int lenght = input_int();
-                if (lenght == -1) {
+                int length = input_int();
+                if (length == -1) {
                     puts("Некорректная длина!");
                     break;
                 }
@@ -58,7 +58,7 @@ int main() {
                     puts("Некорректная минимальная глубина!");
                     break;
                 }
-                add_river(lenght, name, depth, list);
+                add_river(length, name, depth, list);
                 puts("Река успешно добавлена");
                 break;
 
